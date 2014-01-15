@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
+using System.Diagnostics;
 namespace VideoConv
 {
     class Program
@@ -29,11 +30,23 @@ namespace VideoConv
             var options = new Options();
             if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
-                Console.WriteLine("Input: {0}", options.InputFile);
-                Console.WriteLine("Output: {0}", options.OutputFile);
-                Console.WriteLine("x264 path: {0}", options.x264Path);
+                Console.WriteLine("Input: \"{0}\"", options.InputFile);
+                Console.WriteLine("Output: \"{0}\"", options.OutputFile);
+                Console.WriteLine("x264 path: \"{0}\"", options.x264Path);
 
+                EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
+        }
+        static void EasyConvert(string X264Path, string InputFile,string OutputFile)
+        {
+            //only video MKV. Without subs and audio.
+            string cmd = String.Format("\"{0}\" --preset veryfast --tune animation --crf 18 -o \"{1}\" \"{2}\"", X264Path, OutputFile, InputFile);
+            Console.WriteLine("Execute command: {0}",cmd);
+            Process proc = new Process();
+            proc.StartInfo.FileName = "cmd.exe";
+            proc.StartInfo.Arguments = String.Format("/C \"{0}\"", cmd);
+            proc.Start();
+
         }
     }
 }
