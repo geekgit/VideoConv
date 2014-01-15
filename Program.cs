@@ -37,6 +37,9 @@ namespace VideoConv
                 Console.WriteLine("Output: \"{0}\"", options.OutputFile);
                 Console.WriteLine("x264 path: \"{0}\"", options.x264Path);
                 Console.WriteLine("MKVToolNix path: \"{0}\"", options.mkvPath);
+                string tracks=GetTracksInfo(options.mkvPath,options.InputFile);
+                Console.WriteLine("===Tracks info===\n{0}", tracks);
+                Console.WriteLine("===Start converting===");
                 EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
         }
@@ -56,6 +59,31 @@ namespace VideoConv
                 }
             };
             proc.Start();
+        }
+        static string GetTracksInfo(string MKVPath,string FilePath)
+        {
+            //gets help info about mkvinfo
+            string cmd = String.Format("\"{0}\\mkvmerge.exe\" -i --ui-language en \"{1}\"", MKVPath,FilePath);
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = String.Format("/C \"{0}\"", cmd),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+            proc.Start();
+            StringBuilder sb = new StringBuilder();
+            while (!proc.StandardOutput.EndOfStream)
+            {
+                string line = proc.StandardOutput.ReadLine();
+                sb.AppendLine(line);
+            }
+            return sb.ToString();
+            
         }
     }
 }
