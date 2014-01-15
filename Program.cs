@@ -3,14 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using CommandLine;
+using CommandLine.Text;
 namespace VideoConv
 {
     class Program
     {
+        class Options
+        {
+            [Option('i', Required = true, HelpText = "Input file.")]
+            public string InputFile { get; set; }
+            [Option('o', Required = true, HelpText = "Output file.")]
+            public string OutputFile { get; set; }
+            [HelpOption]
+            public string GetUsage()
+            {
+                return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+            }
+        }
         static void Main(string[] args)
         {
-            Console.WriteLine("Welcome to VideoConv!");
+            var options = new Options();
+            if (CommandLine.Parser.Default.ParseArguments(args, options))
+            {
+                Console.WriteLine("Input: {0}", options.InputFile);
+                Console.WriteLine("Output: {0}", options.OutputFile);
+            }
         }
     }
 }
