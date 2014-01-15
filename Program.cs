@@ -44,8 +44,11 @@ namespace VideoConv
                 {
                     Console.WriteLine(track);
                 }
+                ExtractContent(options.mkvPath, options.InputFile);
                 Console.WriteLine("===Start converting===");
-                EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
+                ;
+                ;
+               //EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
         }
         static void EasyConvert(string X264Path, string InputFile, string OutputFile)
@@ -88,6 +91,8 @@ namespace VideoConv
                     exts[i] = ext;
                 }
         }
+        static int VIDEO_ID=-1;//main ID
+        static ArrayList filenames = new ArrayList();
         static void ExtractContent(string MKVPath, string FilePath)
         {
             string[] tracks = GetTracksInfo(MKVPath, FilePath);
@@ -95,10 +100,17 @@ namespace VideoConv
             string[] types = null;
             
             ParseTracksInfo(tracks, out exts, out types);
+            
             string _args = "";
             for (int i = 0; i < tracks.Length; ++i)
             {
-                string param = String.Format("{0}:{0}{1}.{2}", i, types[i], exts[i]);
+                string filename=String.Format("{0}{1}.{2}",i,types[i],exts[i]);
+                filenames.Add(filename);
+                string param = String.Format("{0}:{1}", i, filename);
+                
+                if (types[i] == "video")
+                    VIDEO_ID = i;
+
                 _args += param + " ";
                 
             }
