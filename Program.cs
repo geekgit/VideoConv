@@ -65,7 +65,58 @@ namespace VideoConv
             };
             proc.Start();
         }
-        static string[] GetTracksInfo(string MKVPath,string FilePath)
+        static void ParseTracksInfo(string[] tracks,out string[] exts,out string[] types)
+        {
+            exts = new string[tracks.Length];
+            types = new string[tracks.Length];
+                for(int i=0;i<tracks.Length;++i)
+                {
+                    string track = tracks[i];
+                    string[] elements = track.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                        for (int j = 0; j < elements.Length; ++j)
+                        {
+                            elements[j] = (elements[j].TrimEnd()).TrimStart();
+                        }
+                    string id_part = elements[0];
+                    string[] id_elements = id_part.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    int ID = int.Parse(id_elements[id_elements.Length - 1]);
+                    string codec_part = elements[1];
+                    string[] codec_elements = codec_part.Split(new char[] { ' ','_','/','(',')' }, StringSplitOptions.RemoveEmptyEntries);
+                    string type = codec_elements[0];
+                    string ext = codec_elements[codec_elements.Length - 1];
+                    types[i] = type;
+                    exts[i] = ext;
+                }
+        }
+        static void ExtractContent(string MKVPath, string FilePath)
+        {
+            string[] tracks = GetTracksInfo(MKVPath, FilePath);
+            string[] exts = null;
+            string[] types = null;
+            
+            ParseTracksInfo(tracks, out exts, out types);
+            string _args = "";
+            for (int i = 0; i < tracks.Length; ++i)
+            {
+                string param = String.Format("{0}:{0}{1}.{2}", i, types[i], exts[i]);
+                _args += param + " ";
+                
+            }
+            _args = '"'+MKVPath + "\\mkvextract.exe\" tracks "+'"'+FilePath +'"'+' '+ _args+" --ui-language en";
+            Console.WriteLine(_args);
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = String.Format("/C \"{0}\"", _args),
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            proc.Start();
+        }
+        static string[] GetTracksInfo(string MKVPath, string FilePath)
         {
             //get tracks into
             string cmd = String.Format("\"{0}\\mkvmerge.exe\" -i --ui-language en \"{1}\"", MKVPath,FilePath);
