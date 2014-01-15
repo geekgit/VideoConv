@@ -80,7 +80,7 @@ namespace VideoConv
             while (!proc.StandardOutput.EndOfStream)
             {
                 string line = proc.StandardOutput.ReadLine();
-                sb.Append(line);
+                sb.AppendLine(line);
             }
             return sb.ToString();
             
