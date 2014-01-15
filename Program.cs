@@ -37,20 +37,25 @@ namespace VideoConv
                 Console.WriteLine("Output: \"{0}\"", options.OutputFile);
                 Console.WriteLine("x264 path: \"{0}\"", options.x264Path);
                 Console.WriteLine("MKVToolNix path: \"{0}\"", options.mkvPath);
-
                 EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
         }
-        static void EasyConvert(string X264Path, string InputFile,string OutputFile)
+        static void EasyConvert(string X264Path, string InputFile, string OutputFile)
         {
+            //sort of async
             //only video MKV. Without subs and audio.
             string cmd = String.Format("\"{0}\" --preset veryfast --tune animation --crf 18 -o \"{1}\" \"{2}\"", X264Path, OutputFile, InputFile);
-            Console.WriteLine("Execute command: {0}",cmd);
-            Process proc = new Process();
-            proc.StartInfo.FileName = "cmd.exe";
-            proc.StartInfo.Arguments = String.Format("/C \"{0}\"", cmd);
+            Console.WriteLine("Execute command: {0}", cmd);
+            Process proc = new Process {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName="cmd.exe",
+                    Arguments=String.Format("/C \"{0}\"", cmd),
+                    UseShellExecute=false,
+                    CreateNoWindow=true
+                }
+            };
             proc.Start();
-
         }
     }
 }
