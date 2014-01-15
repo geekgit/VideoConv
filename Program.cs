@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using System.Diagnostics;
+using System.Collections;
 namespace VideoConv
 {
     class Program
@@ -37,8 +38,12 @@ namespace VideoConv
                 Console.WriteLine("Output: \"{0}\"", options.OutputFile);
                 Console.WriteLine("x264 path: \"{0}\"", options.x264Path);
                 Console.WriteLine("MKVToolNix path: \"{0}\"", options.mkvPath);
-                string tracks=GetTracksInfo(options.mkvPath,options.InputFile);
-                Console.WriteLine("===Tracks info===\n{0}", tracks);
+                string[] tracks=GetTracksInfo(options.mkvPath,options.InputFile);
+                Console.WriteLine("===Tracks info===");
+                foreach (string track in tracks)
+                {
+                    Console.WriteLine(track);
+                }
                 Console.WriteLine("===Start converting===");
                 EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
@@ -60,9 +65,9 @@ namespace VideoConv
             };
             proc.Start();
         }
-        static string GetTracksInfo(string MKVPath,string FilePath)
+        static string[] GetTracksInfo(string MKVPath,string FilePath)
         {
-            //gets help info about mkvinfo
+            //get tracks into
             string cmd = String.Format("\"{0}\\mkvmerge.exe\" -i --ui-language en \"{1}\"", MKVPath,FilePath);
             Process proc = new Process
             {
@@ -76,13 +81,15 @@ namespace VideoConv
                 }
             };
             proc.Start();
+            ArrayList al = new ArrayList();
             StringBuilder sb = new StringBuilder();
             while (!proc.StandardOutput.EndOfStream)
             {
                 string line = proc.StandardOutput.ReadLine();
-                sb.AppendLine(line);
+                if (!line.Contains("Track ID")) continue;
+                else al.Add(line);
             }
-            return sb.ToString();
+            return (string[])al.ToArray(typeof(string));
             
         }
     }
