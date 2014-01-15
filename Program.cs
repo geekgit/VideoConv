@@ -15,7 +15,7 @@ namespace VideoConv
             public string InputFile { get; set; }
             [Option('o', Required = true, HelpText = "Output file.")]
             public string OutputFile { get; set; }
-            [Option("x264_path", Required = true, HelpText = "Full path to x264 executable")]
+            [Option("x264_path", Required = true, HelpText = @"Full path to x264 (8 bit) executable. See http://download.videolan.org/pub/x264/binaries/" )]
             public string x264Path { get; set; }
             [HelpOption]
             public string GetUsage()
