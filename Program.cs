@@ -19,6 +19,9 @@ namespace VideoConv
             [Option("x264_path", Required = true,
                 HelpText = @"Full path to x264 (8 bit) executable. See http://download.videolan.org/pub/x264/binaries/" )]
             public string x264Path { get; set; }
+            [Option("mkv_path", Required = true,
+                HelpText = @"Full path to MKVToolNix. See http://www.bunkus.org/videotools/mkvtoolnix/downloads.html" )]
+            public string mkvPath { get; set; }
             [HelpOption]
             public string GetUsage()
             {
@@ -33,6 +36,7 @@ namespace VideoConv
                 Console.WriteLine("Input: \"{0}\"", options.InputFile);
                 Console.WriteLine("Output: \"{0}\"", options.OutputFile);
                 Console.WriteLine("x264 path: \"{0}\"", options.x264Path);
+                Console.WriteLine("MKVToolNix path: \"{0}\"", options.mkvPath);
 
                 EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
