@@ -44,11 +44,8 @@ namespace VideoConv
                 {
                     Console.WriteLine(track);
                 }
-                ExtractContent(options.mkvPath, options.InputFile);
-                Console.WriteLine("===Start converting===");
-                ;
-                ;
-               //EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
+               Console.WriteLine("===Start converting===");
+               EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
             }
         }
         static void EasyConvert(string X264Path, string InputFile, string OutputFile)
@@ -57,6 +54,9 @@ namespace VideoConv
             //only video MKV. Without subs and audio.
             string cmd = String.Format("\"{0}\" --preset veryfast --tune animation --crf 18 -o \"{1}\" \"{2}\"", X264Path, OutputFile, InputFile);
             Console.WriteLine("Execute command: {0}", cmd);
+#if DEBUG
+            Console.WriteLine("[DEBUG] No Real Converting in Debug Mode");
+#else
             Process proc = new Process {
                 StartInfo = new ProcessStartInfo
                 {
@@ -67,7 +67,8 @@ namespace VideoConv
                 }
             };
             proc.Start();
-        }
+#endif
+            }
         static void ParseTracksInfo(string[] tracks,out string[] exts,out string[] types)
         {
             exts = new string[tracks.Length];
@@ -91,10 +92,11 @@ namespace VideoConv
                     exts[i] = ext;
                 }
         }
-        static int VIDEO_ID=-1;//main ID
-        static ArrayList filenames = new ArrayList();
-        static void ExtractContent(string MKVPath, string FilePath)
+        static void ExtractContent(string MKVPath, string FilePath, out int VIDEO_ID, out string[] ExtractedContentFilenames,out string[] ExtractedTypes)
         {
+            VIDEO_ID = -1;//if no video in MKV
+            ArrayList filenames = new ArrayList();
+            //
             string[] tracks = GetTracksInfo(MKVPath, FilePath);
             string[] exts = null;
             string[] types = null;
@@ -116,6 +118,8 @@ namespace VideoConv
             }
             _args = '"'+MKVPath + "\\mkvextract.exe\" tracks "+'"'+FilePath +'"'+' '+ _args+" --ui-language en";
             Console.WriteLine(_args);
+            ExtractedContentFilenames = (string[])filenames.ToArray(typeof(string));
+            ExtractedTypes = types;
             Process proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -127,6 +131,7 @@ namespace VideoConv
                 }
             };
             proc.Start();
+
         }
         static string[] GetTracksInfo(string MKVPath, string FilePath)
         {
