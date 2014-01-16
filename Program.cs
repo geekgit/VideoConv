@@ -7,6 +7,7 @@ using CommandLine;
 using CommandLine.Text;
 using System.Diagnostics;
 using System.Collections;
+using System.IO;
 namespace VideoConv
 {
     class Program
@@ -46,29 +47,65 @@ namespace VideoConv
                 }
                Console.WriteLine("===Start converting===");
                EasyConvert(options.x264Path, options.InputFile, options.OutputFile);
+               Console.WriteLine("===Start merging===");
+               MergeMKV(options.mkvPath, options.InputFile, options.OutputFile);
+               Console.WriteLine("OK!");
             }
         }
         static void EasyConvert(string X264Path, string InputFile, string OutputFile)
         {
-            //sort of async
             //only video MKV. Without subs and audio.
             string cmd = String.Format("\"{0}\" --preset veryfast --tune animation --crf 18 -o \"{1}\" \"{2}\"", X264Path, OutputFile, InputFile);
-            Console.WriteLine("Execute command: {0}", cmd);
 #if DEBUG
-            Console.WriteLine("[DEBUG] No Real Converting in Debug Mode");
-#else
+            Console.WriteLine("Execute command: {0}", cmd);
+#endif
+            
             Process proc = new Process {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName="cmd.exe",
                     Arguments=String.Format("/C \"{0}\"", cmd),
                     UseShellExecute=false,
-                    CreateNoWindow=true
+                    CreateNoWindow=true,
+                    RedirectStandardOutput = true
                 }
             };
             proc.Start();
-#endif
+            Console.WriteLine("Converting...");
+            while (!proc.StandardOutput.EndOfStream) ;
             }
+        static void MergeMKV(string MKVPath, string InputFile, string OutputFile)
+        {
+            string TempFile = @"temp.mkv";
+            string cmd = String.Format("\"{0}\\mkvmerge.exe\" \"{1}\" --no-video \"{2}\" --output \"{3}\" --ui-language en ", MKVPath,OutputFile,InputFile,TempFile);
+#if DEBUG
+            Console.WriteLine(cmd);
+#endif
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = String.Format("/C \"{0}\"", cmd),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+            proc.Start();
+            while (!proc.StandardOutput.EndOfStream)
+            {
+                string line = proc.StandardOutput.ReadLine();
+                Console.WriteLine(line);
+            }
+            File.Delete(OutputFile);
+            Console.WriteLine("Deleted {0}", OutputFile);
+            File.Copy(TempFile, OutputFile);
+            Console.WriteLine("Copied {0} to {1}", TempFile, OutputFile);
+            File.Delete(TempFile);
+            Console.WriteLine("Deleted {0}", TempFile);
+            
+        }
         static void ParseTracksInfo(string[] tracks,out string[] exts,out string[] types)
         {
             exts = new string[tracks.Length];
